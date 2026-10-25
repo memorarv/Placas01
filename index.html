@@ -81,30 +81,11 @@ function getRecords() {
   return records;
 }
 function setStatus(s, detail='') { statusEl.textContent = 'Estado: ' + s; detailEl.textContent = detail; }
-async function loadMapping() {
+function loadMapping() {
   try {
-    const response = await fetch('./placas.json', {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      throw new Error('No se pudo cargar placas.json');
-    }
-
-    const records = await response.json();
-
-    if (!Array.isArray(records)) {
-      throw new Error('El registro no tiene el formato esperado');
-    }
-
-    mappingEl.value = JSON.stringify(records, null, 2);
-    setStatus('registro de placas actualizado.');
-  } catch (error) {
-    setStatus(
-      'No se pudo actualizar el registro.',
-      'Comprueba tu conexión y que placas.json esté publicado.'
-    );
-  }
+    const saved = localStorage.getItem('placas-map');
+    mappingEl.value = saved || JSON.stringify(sample, null, 2);
+  } catch { mappingEl.value = JSON.stringify(sample, null, 2); }
 }
 document.querySelector('#save').addEventListener('click', () => {
   try {
@@ -174,7 +155,6 @@ async function scanLoop() {
 startBtn.addEventListener('click', async () => {
   try {
     startBtn.disabled = true;
-    await loadMapping();
     setStatus('solicitando acceso a la cámara…');
     stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
